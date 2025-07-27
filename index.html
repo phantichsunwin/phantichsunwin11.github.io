@@ -3,11 +3,12 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Admin Duyệt Tài Khoản 👑</title>
+  <title>👑 Admin Duyệt Tài Khoản</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet">
   <style>
     body {
       margin: 0;
-      font-family: 'Segoe UI', sans-serif;
+      font-family: 'Orbitron', sans-serif;
       background: url('https://i.postimg.cc/7YJR7NSR/snaptik-7473142126218431752-7.jpg') no-repeat center center fixed;
       background-size: cover;
       color: #fff;
@@ -17,24 +18,28 @@
       max-width: 900px;
       margin: 50px auto;
       padding: 30px;
-      background: rgba(0, 0, 50, 0.7);
+      background: rgba(0, 0, 0, 0.4);
+      backdrop-filter: blur(12px);
       border-radius: 20px;
-      box-shadow: 0 0 30px #00ffff80;
+      box-shadow: 0 0 30px #00ffff70;
     }
 
     h1, h2 {
       text-align: center;
       color: #00ffff;
+      text-shadow: 0 0 10px #00ffffaa;
     }
 
-    input[type="password"] {
+    input[type="password"], select {
       width: 100%;
       padding: 12px;
       border-radius: 10px;
       margin-bottom: 20px;
       border: none;
-      background: #111;
+      background: #111933;
       color: white;
+      font-size: 16px;
+      outline: none;
     }
 
     button {
@@ -44,6 +49,8 @@
       margin: 5px;
       cursor: pointer;
       border: none;
+      font-size: 14px;
+      transition: 0.3s;
     }
 
     .btn-login {
@@ -62,9 +69,21 @@
       color: white;
     }
 
+    .btn-clear {
+      background: #ff9900;
+      color: black;
+      float: right;
+    }
+
+    .btn-refresh {
+      background: #3a7bd5;
+      color: white;
+      float: left;
+    }
+
     table {
       width: 100%;
-      margin-top: 30px;
+      margin-top: 20px;
       border-collapse: collapse;
     }
 
@@ -74,7 +93,7 @@
     }
 
     th {
-      background: rgba(0, 255, 255, 0.2);
+      background: rgba(0, 255, 255, 0.1);
       color: #00ffff;
     }
 
@@ -107,6 +126,20 @@
 
     <div id="adminPanel" class="hidden">
       <h2>📋 Danh Sách Tài Khoản</h2>
+      <div style="margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;">
+        <button class="btn-refresh" onclick="loadUsers()">🔁 Làm mới dữ liệu</button>
+        <div style="flex: 1; text-align: center;">
+          <label>Lọc theo trạng thái: </label>
+          <select id="filterStatus" onchange="loadUsers()">
+            <option value="all">-- Tất cả --</option>
+            <option value="pending">Chờ duyệt</option>
+            <option value="approved">Đã duyệt</option>
+            <option value="rejected">Bị từ chối</option>
+          </select>
+        </div>
+        <button class="btn-clear" onclick="clearAllUsers()">🧹 Xóa tất cả</button>
+      </div>
+
       <div id="status"></div>
       <table>
         <thead>
@@ -136,18 +169,20 @@
     }
 
     function loadUsers() {
-      const users = JSON.parse(localStorage.getItem("users") || "[]");
+      const filter = document.getElementById("filterStatus").value;
+      let users = JSON.parse(localStorage.getItem("users") || "[]");
       const table = document.getElementById("userTable");
       table.innerHTML = "";
 
-      if (users.length === 0) {
-        document.getElementById("status").textContent = "✅ Không có tài khoản nào.";
+      let filtered = (filter === "all") ? users : users.filter(u => u.status === filter);
+      if (filtered.length === 0) {
+        document.getElementById("status").textContent = "⚠️ Không có tài khoản phù hợp.";
         return;
       } else {
         document.getElementById("status").textContent = "";
       }
 
-      users.forEach(user => {
+      filtered.forEach(user => {
         const row = document.createElement("tr");
         row.innerHTML = `
           <td>${user.username}</td>
@@ -168,8 +203,16 @@
         return u;
       });
       localStorage.setItem("users", JSON.stringify(users));
-      alert(`🔄 Trạng thái mới của ${username}: ${newStatus.toUpperCase()}`);
       loadUsers();
+      alert(`✅ Đã cập nhật trạng thái tài khoản "${username}" thành "${newStatus.toUpperCase()}"`);
+    }
+
+    function clearAllUsers() {
+      if (confirm("⚠️ Bạn có chắc muốn xóa toàn bộ tài khoản không?")) {
+        localStorage.removeItem("users");
+        loadUsers();
+        alert("🧹 Đã xóa toàn bộ tài khoản!");
+      }
     }
   </script>
 </body>
