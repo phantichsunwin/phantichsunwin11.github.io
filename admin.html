@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin Duyệt Tài Khoản 👑</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: url('https://i.postimg.cc/7YJR7NSR/snaptik-7473142126218431752-7.jpg') no-repeat center center fixed;
+      background-size: cover;
+      color: #fff;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 50px auto;
+      padding: 30px;
+      background: rgba(0, 0, 50, 0.7);
+      border-radius: 20px;
+      box-shadow: 0 0 30px #00ffff80;
+    }
+
+    h1, h2 {
+      text-align: center;
+      color: #00ffff;
+    }
+
+    input[type="password"] {
+      width: 100%;
+      padding: 12px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+      border: none;
+      background: #111;
+      color: white;
+    }
+
+    button {
+      padding: 10px 20px;
+      border-radius: 10px;
+      font-weight: bold;
+      margin: 5px;
+      cursor: pointer;
+      border: none;
+    }
+
+    .btn-login {
+      background: linear-gradient(to right, #00c6ff, #0072ff);
+      color: white;
+      width: 100%;
+    }
+
+    .btn-approve {
+      background: #00ff99;
+      color: black;
+    }
+
+    .btn-reject {
+      background: #ff3333;
+      color: white;
+    }
+
+    table {
+      width: 100%;
+      margin-top: 30px;
+      border-collapse: collapse;
+    }
+
+    th, td {
+      padding: 14px;
+      border-bottom: 1px solid #444;
+    }
+
+    th {
+      background: rgba(0, 255, 255, 0.2);
+      color: #00ffff;
+    }
+
+    #status {
+      margin-top: 20px;
+      text-align: center;
+      font-weight: bold;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .status-text {
+      font-weight: bold;
+    }
+
+    .approved { color: #00ffcc; }
+    .rejected { color: #ff4444; }
+    .pending { color: #ffaa00; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div id="adminLogin">
+      <h1>🔐 ĐĂNG NHẬP ADMIN</h1>
+      <input type="password" id="adminPass" placeholder="Nhập mật khẩu admin..." />
+      <button class="btn-login" onclick="loginAdmin()">Vào Quản Lý</button>
+    </div>
+
+    <div id="adminPanel" class="hidden">
+      <h2>📋 Danh Sách Tài Khoản</h2>
+      <div id="status"></div>
+      <table>
+        <thead>
+          <tr>
+            <th>Tài khoản</th>
+            <th>Trạng thái</th>
+            <th>Hành động</th>
+          </tr>
+        </thead>
+        <tbody id="userTable"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <script>
+    const ADMIN_PASSWORD = "trinhaicham";
+
+    function loginAdmin() {
+      const pass = document.getElementById("adminPass").value;
+      if (pass === ADMIN_PASSWORD) {
+        document.getElementById("adminLogin").classList.add("hidden");
+        document.getElementById("adminPanel").classList.remove("hidden");
+        loadUsers();
+      } else {
+        alert("❌ Mật khẩu sai!");
+      }
+    }
+
+    function loadUsers() {
+      const users = JSON.parse(localStorage.getItem("users") || "[]");
+      const table = document.getElementById("userTable");
+      table.innerHTML = "";
+
+      if (users.length === 0) {
+        document.getElementById("status").textContent = "✅ Không có tài khoản nào.";
+        return;
+      } else {
+        document.getElementById("status").textContent = "";
+      }
+
+      users.forEach(user => {
+        const row = document.createElement("tr");
+        row.innerHTML = `
+          <td>${user.username}</td>
+          <td class="status-text ${user.status}">${user.status.toUpperCase()}</td>
+          <td>
+            <button class="btn-approve" onclick="updateStatus('${user.username}', 'approved')">Duyệt</button>
+            <button class="btn-reject" onclick="updateStatus('${user.username}', 'rejected')">Hủy</button>
+          </td>
+        `;
+        table.appendChild(row);
+      });
+    }
+
+    function updateStatus(username, newStatus) {
+      let users = JSON.parse(localStorage.getItem("users") || "[]");
+      users = users.map(u => {
+        if (u.username === username) u.status = newStatus;
+        return u;
+      });
+      localStorage.setItem("users", JSON.stringify(users));
+      alert(`🔄 Trạng thái mới của ${username}: ${newStatus.toUpperCase()}`);
+      loadUsers();
+    }
+  </script>
+</body>
+</html>
